@@ -1,5 +1,8 @@
 const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
+const holdCanvas = document.getElementById("hold");
+const holdCtx = holdCanvas.getContext("2d");
+
 const ROWS = 20, COLS = 10, SIZE = 20;
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -57,15 +60,16 @@ function drawPiece() {
 
 // **ホールドブロックの表示**
 function drawHoldPiece() {
+    holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
     if (!holdPiece) return;
 
     holdPiece.shape.forEach((row, dy) =>
         row.forEach((cell, dx) => {
             if (cell) {
-                ctx.fillStyle = holdPiece.color;
-                ctx.fillRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
-                ctx.strokeStyle = "black";
-                ctx.strokeRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
+                holdCtx.fillStyle = holdPiece.color;
+                holdCtx.fillRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
+                holdCtx.strokeStyle = "black";
+                holdCtx.strokeRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
             }
         })
     );
@@ -121,18 +125,16 @@ function gameLoop() {
     clearLines();
     drawBoard();
     drawPiece();
-    drawHoldPiece();  // ホールドしたブロックを表示
+    drawHoldPiece();
     setTimeout(gameLoop, 500);
 }
 
-// **キー操作**
-document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") piece.x--;
-    if (e.key === "ArrowRight") piece.x++;
-    if (e.key === "ArrowDown") movePiece();
-    if (e.key === "ArrowUp") piece.shape = rotate(piece.shape);
-    if (e.key === " ") holdBlock();
-});
+// **キー・ボタン操作**
+document.getElementById("left-btn").addEventListener("click", () => piece.x--);
+document.getElementById("right-btn").addEventListener("click", () => piece.x++);
+document.getElementById("down-btn").addEventListener("click", movePiece);
+document.getElementById("rotate-btn").addEventListener("click", () => piece.shape = rotate(piece.shape));
+document.getElementById("hold-btn").addEventListener("click", holdBlock);
 
 // **ゲーム開始**
 newPiece();
