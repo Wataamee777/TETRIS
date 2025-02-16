@@ -2,24 +2,25 @@ const canvas = document.getElementById("tetris");
 const ctx = canvas.getContext("2d");
 const ROWS = 20, COLS = 10, SIZE = 20;
 
-let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 
 const SHAPES = [
-    [[1, 1, 1, 1]], // I
-    [[1, 1], [1, 1]], // O
-    [[0, 1, 0], [1, 1, 1]], // T
-    [[1, 1, 0], [0, 1, 1]], // S
-    [[0, 1, 1], [1, 1, 0]], // Z
-    [[1, 1, 1], [1, 0, 0]], // L
-    [[1, 1, 1], [0, 0, 1]] // J
+    { shape: [[1, 1, 1, 1]], color: "cyan" }, // I
+    { shape: [[1, 1], [1, 1]], color: "yellow" }, // O
+    { shape: [[0, 1, 0], [1, 1, 1]], color: "purple" }, // T
+    { shape: [[1, 1, 0], [0, 1, 1]], color: "green" }, // S
+    { shape: [[0, 1, 1], [1, 1, 0]], color: "red" }, // Z
+    { shape: [[1, 1, 1], [1, 0, 0]], color: "orange" }, // L
+    { shape: [[1, 1, 1], [0, 0, 1]], color: "blue" } // J
 ];
 
-let piece = { shape: [], x: 3, y: 0 };
-let holdPiece = null; // **ホールド用**
-let canHold = true; // **1回の落下ごとに1回だけホールド可能**
+let piece = { shape: [], color: "", x: 3, y: 0 };
+let holdPiece = null;
+let canHold = true;
 
 function newPiece() {
-    piece = { shape: JSON.parse(JSON.stringify(SHAPES[Math.floor(Math.random() * SHAPES.length)])), x: 3, y: 0 };
+    let rand = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    piece = { shape: JSON.parse(JSON.stringify(rand.shape)), color: rand.color, x: 3, y: 0 };
     canHold = true;
 }
 
@@ -32,7 +33,7 @@ function drawBoard() {
     board.forEach((row, y) =>
         row.forEach((cell, x) => {
             if (cell) {
-                ctx.fillStyle = "cyan";
+                ctx.fillStyle = cell.color;
                 ctx.fillRect(x * SIZE, y * SIZE, SIZE, SIZE);
                 ctx.strokeStyle = "black";
                 ctx.strokeRect(x * SIZE, y * SIZE, SIZE, SIZE);
@@ -45,7 +46,7 @@ function drawPiece() {
     piece.shape.forEach((row, dy) =>
         row.forEach((cell, dx) => {
             if (cell) {
-                ctx.fillStyle = "yellow";
+                ctx.fillStyle = piece.color;
                 ctx.fillRect((piece.x + dx) * SIZE, (piece.y + dy) * SIZE, SIZE, SIZE);
                 ctx.strokeStyle = "black";
                 ctx.strokeRect((piece.x + dx) * SIZE, (piece.y + dy) * SIZE, SIZE, SIZE);
@@ -65,21 +66,21 @@ function movePiece() {
 
 function collision() {
     return piece.shape.some((row, dy) =>
-        row.some((cell, dx) => cell && (board[piece.y + dy]?.[piece.x + dx] !== 0 || piece.y + dy >= ROWS))
+        row.some((cell, dx) => cell && (board[piece.y + dy]?.[piece.x + dx] !== null || piece.y + dy >= ROWS))
     );
 }
 
 function mergePiece() {
     piece.shape.forEach((row, dy) =>
         row.forEach((cell, dx) => {
-            if (cell) board[piece.y + dy][piece.x + dx] = 1;
+            if (cell) board[piece.y + dy][piece.x + dx] = { color: piece.color };
         })
     );
 }
 
 function clearLines() {
-    board = board.filter(row => row.some(cell => cell === 0));
-    while (board.length < ROWS) board.unshift(Array(COLS).fill(0));
+    board = board.filter(row => row.some(cell => cell === null));
+    while (board.length < ROWS) board.unshift(Array(COLS).fill(null));
 }
 
 // **ホールド機能**
@@ -88,12 +89,10 @@ function holdBlock() {
 
     if (holdPiece) {
         let temp = holdPiece;
-        holdPiece = piece.shape;
-        piece.shape = temp;
-        piece.x = 3;
-        piece.y = 0;
+        holdPiece = { shape: piece.shape, color: piece.color };
+        piece = { shape: temp.shape, color: temp.color, x: 3, y: 0 };
     } else {
-        holdPiece = piece.shape;
+        holdPiece = { shape: piece.shape, color: piece.color };
         newPiece();
     }
 
@@ -118,38 +117,6 @@ document.addEventListener("keydown", (e) => {
     if (e.key === " ") holdBlock();
 });
 
-// **ボタン操作**
-document.getElementById("hold-btn").addEventListener("click", holdBlock);
-document.getElementById("save-btn").addEventListener("click", saveGame);
-document.getElementById("load-btn").addEventListener("click", loadGame);
-
-// **セーブ機能**
-function saveGame() {
-    localStorage.setItem("tetris_board", JSON.stringify(board));
-    localStorage.setItem("tetris_piece", JSON.stringify(piece));
-    localStorage.setItem("tetris_holdPiece", JSON.stringify(holdPiece));
-    localStorage.setItem("tetris_canHold", JSON.stringify(canHold));
-    alert("ゲームをセーブしました！");
-}
-
-function loadGame() {
-    let savedBoard = localStorage.getItem("tetris_board");
-    let savedPiece = localStorage.getItem("tetris_piece");
-    let savedHoldPiece = localStorage.getItem("tetris_holdPiece");
-    let savedCanHold = localStorage.getItem("tetris_canHold");
-
-    if (savedBoard && savedPiece) {
-        board = JSON.parse(savedBoard);
-        piece = JSON.parse(savedPiece);
-        holdPiece = JSON.parse(savedHoldPiece);
-        canHold = JSON.parse(savedCanHold);
-        alert("ゲームをロードしました！");
-    } else {
-        alert("セーブデータがありません！");
-    }
-}
-
 // **ゲーム開始**
 newPiece();
-loadGame();
 gameLoop();
