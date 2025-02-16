@@ -10,12 +10,8 @@ canvas {
     border: 2px solid white;
 }
 
-.buttons {
-    margin-top: 10px;
-}
-
 button {
-    font-size: 16px;
+    font-size: 18px;
     padding: 10px 20px;
     margin: 5px;
     border: none;
