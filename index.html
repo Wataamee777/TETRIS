@@ -5,15 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tetris</title>
     <link rel="stylesheet" href="style.css">
+    <!-- ファビコン設定 -->
+    <link rel="icon" href="icon.png" type="image/png">
 </head>
 <body>
     <h1>Tetris</h1>
     <canvas id="tetris" width="200" height="400"></canvas>
+
+    <!-- スマホ用ボタン -->
+    <div class="mobile-buttons">
+        <button id="left-btn">⬅️</button>
+        <button id="rotate-btn">🔄</button>
+        <button id="right-btn">➡️</button>
+        <button id="down-btn">⬇️</button>
+        <button id="hold-btn">⏳</button>
+    </div>
+
     <div class="buttons">
-        <button id="hold-btn">ホールド</button>
         <button id="save-btn">セーブ</button>
         <button id="load-btn">ロード</button>
     </div>
+
     <script src="tetris.js"></script>
 </body>
 </html>
