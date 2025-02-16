@@ -55,6 +55,22 @@ function drawPiece() {
     );
 }
 
+// **ホールドブロックの表示**
+function drawHoldPiece() {
+    if (!holdPiece) return;
+
+    holdPiece.shape.forEach((row, dy) =>
+        row.forEach((cell, dx) => {
+            if (cell) {
+                ctx.fillStyle = holdPiece.color;
+                ctx.fillRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(dx * SIZE, dy * SIZE, SIZE, SIZE);
+            }
+        })
+    );
+}
+
 function movePiece() {
     piece.y++;
     if (collision()) {
@@ -105,6 +121,7 @@ function gameLoop() {
     clearLines();
     drawBoard();
     drawPiece();
+    drawHoldPiece();  // ホールドしたブロックを表示
     setTimeout(gameLoop, 500);
 }
 
